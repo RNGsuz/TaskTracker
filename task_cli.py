@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 
 TASKS_FILE = "tasks.json"
+VALID_STATUSES = ["todo", "in-progress","done"]
 
 def load_tasks():
     if not os.path.exists(TASKS_FILE):
@@ -47,7 +48,28 @@ def cmd_add(args):
     print(f"Task has bin added (ID: {new_id})")
 
 def cmd_list(args):
-    print("LIST aufgerufen")
+    tasks = load_tasks()
+    status_filter = args.status
+
+    if status_filter and status_filter not in VALID_STATUSES:
+        print("Error: Invalid status. Use: todo, in-progress, done")
+        return
+    if status_filter:
+        tasks = [t for t in tasks if t ["status"] == status_filter]
+
+    if not tasks:
+        if status_filter:
+            print(f"No tasks with status “{status_filter}“.")
+        else:
+            print("No status")
+        return
+    for task in tasks:
+        print(
+            f"[{task['id']}] "
+            f"({task['status']}) "
+            f"{task['description']} "
+            f"(created: {task['createdAt']}, updated: {task['updatedAt']})"
+        )
 
 def build_parser():
     parser = argparse.ArgumentParser(description="Task Tracker CLI")
@@ -59,6 +81,13 @@ def build_parser():
     p_add.set_defaults(func=cmd_add)
 
     # list
+    p_list = subparsers.add_parser("list", help="List tasks")
+    p_list.add_argument(
+        "status",
+        nargs="?",
+        help="Optional filter: todo, in-progress, done"
+    )
+    p_list.set_defaults(func=cmd_list)
     return parser
 
 def main():
