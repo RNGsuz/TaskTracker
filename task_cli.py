@@ -18,6 +18,12 @@ def load_tasks():
     except (json.JSONDecodeError, OSError):
         return []
 
+def find_task(tasks,task_id):
+    for i, task in enumerate(tasks):
+        if task["id"] == task_id:
+            return task, i
+    return None, None
+
 def save_tasks(tasks):
     with open(TASKS_FILE, "w", encoding="utf-8") as f:
         json.dump(tasks, f, indent=2, ensure_ascii=False)
@@ -29,6 +35,23 @@ def get_next_id(tasks):
 
 def current_timestamp():
     return datetime.now().isoformat(timespec="seconds")
+
+def change_status(task_id, new_status):
+    tasks = load_tasks()
+    task, index = find_task(tasks, task_id)
+    if task is None:
+        print(f"Error: Task with ID {task_id} not found.")
+        return
+    tasks[index]["status"] = new_status
+    tasks[index]["updatedAt"] = current_timestamp()
+    save_tasks(tasks)
+    print(f"Task {task_id} marked as {new_status}.")
+
+def cmd_mark_in_progress(args):
+    change_status(args.id, "in-progress")
+
+def cmd_mark_done(args):
+    change_status(args.id, "done")
 
 def cmd_add(args):
     tasks = load_tasks()
@@ -71,6 +94,33 @@ def cmd_list(args):
             f"(created: {task['createdAt']}, updated: {task['updatedAt']})"
         )
 
+def cmd_update(args):
+    tasks = load_tasks()
+    task_id = args.id
+    task, index = find_task(tasks, task_id)
+
+    if task is None:
+        print(f"Error: Task with ID {task_id} not found.")
+        return
+
+    tasks[index]["description"] = args.description
+    tasks[index]["updateAt"] = current_timestamp()
+    save_tasks(tasks)
+    print(f"Task {task_id} updated successfully.")
+
+def cmd_delete(args):
+    tasks = load_tasks()
+    task_id = args.id
+    task, index = find_task(tasks, task_id)
+
+    if task is None:
+        print(f"Error: Task with ID {task_id} not found")
+        return
+
+    tasks.pop(index)
+    save_tasks(tasks)
+    print(f"Task {task_id} deleted successfully.")
+
 def build_parser():
     parser = argparse.ArgumentParser(description="Task Tracker CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -88,6 +138,28 @@ def build_parser():
         help="Optional filter: todo, in-progress, done"
     )
     p_list.set_defaults(func=cmd_list)
+
+    #update
+    p_update = subparsers.add_parser("update", help="Update an existing task")
+    p_update.add_argument("id", type=int, help="ID of the task to update")
+    p_update.add_argument("description", type=str, help="New description")
+    p_update.set_defaults(func=cmd_update)
+
+    #delete
+    p_delete = subparsers.add_parser("delete", help="Delete a task")
+    p_delete.add_argument("id", type=int, help="ID of the task to delete")
+    p_delete.set_defaults(func=cmd_delete)
+
+    #mark-in-progress
+    p_mip = subparsers.add_parser("mark-in-progress", help="Mark a task as in-progress")
+    p_mip.add_argument("id", type=int, help="ID of task")
+    p_mip.set_defaults(func=cmd_mark_in_progress)
+
+    #mark-done
+    p_md = subparsers.add_parser("mark-done", help="Mark a task as done")
+    p_md.add_argument("id", type=int, help="ID of task")
+    p_md.set_defaults(func=cmd_mark_done)
+
     return parser
 
 def main():

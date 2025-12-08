@@ -1,10 +1,11 @@
 [
   {
     "id": 1,
-    "description": "Buy groceries",
-    "status": "todo",
+    "description": "Buy groceries and cook dinner",
+    "status": "in-progress",
     "createdAt": "2025-12-04T13:51:23",
-    "updatedAt": "2025-12-04T13:51:23"
+    "updatedAt": "2025-12-08T13:19:15",
+    "updateAt": "2025-12-07T16:51:30"
   },
   {
     "id": 2,
@@ -12,5 +13,12 @@
     "status": "todo",
     "createdAt": "2025-12-04T14:18:10",
     "updatedAt": "2025-12-04T14:18:10"
+  },
+  {
+    "id": 3,
+    "description": "Learn Python",
+    "status": "done",
+    "createdAt": "2025-12-08T13:17:45",
+    "updatedAt": "2025-12-08T13:20:04"
   }
 ]
