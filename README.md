@@ -3,6 +3,7 @@
 
 Task Tracker is a simple command-line task management application written in Python.  
 All tasks are stored locally in a file called `tasks.json` in the same directory as the script.
+Project idea from: https://roadmap.sh/projects/task-tracker
 
 ---
 
